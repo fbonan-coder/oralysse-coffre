@@ -1,0 +1,17 @@
+Projet : Oralysse, un coffre numérique où l'on rassemble ce que ses proches auront besoin de savoir. Interface entièrement en français.
+
+Pile technique, à garder :
+- Vite et JavaScript sans framework. Ne pas convertir en React ni en TypeScript.
+- Supabase : connexion sans mot de passe par code e-mail (signInWithOtp puis verifyOtp), table `dossiers` avec une ligne par utilisateur et tout le contenu dans la colonne `state` (jsonb), bucket privé `coffre` rangé par `<user id>/<clé>`.
+- Les styles sont dans index.html. Utiliser les variables CSS existantes (--bg, --fg, --accent, --sage…) et les polices Newsreader et Instrument Sans.
+
+Où modifier :
+- src/app.js : l'interface et la logique (vues, questions, messages). Tout changement d'état passe par save().
+- src/main.js : l'écran d'accueil et de connexion, l'enregistrement automatique.
+- src/cloud.js : tous les appels à Supabase. Il n'y en a nulle part ailleurs.
+
+Règles :
+- RLS toujours active : un utilisateur n'accède qu'à son dossier et à ses fichiers.
+- Jamais de mot de passe ni de clé de service dans le code du navigateur.
+- Ne pas modifier une migration existante : en ajouter une nouvelle dans supabase/migrations.
+- Ton des textes : simple, chaleureux, vouvoiement, phrases courtes.
