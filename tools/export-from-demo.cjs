@@ -29,6 +29,74 @@ const GATE_CSS = `
 #gate small { min-height: 1.4em; max-width: 420px; }
 #save-state { display: inline-block; margin-top: 4px; }
 #save-state[data-kind="err"] { color: var(--accent); font-weight: 600; }
+
+/* Page d'accueil : commencer, ou ouvrir son coffre. */
+#home { position: fixed; inset: 0; z-index: 35; overflow-y: auto; display: flex; flex-direction: column; background: var(--bg); color: var(--fg); }
+.home-top, .home-main, .home-points, .home-foot { padding-left: max(var(--gut), env(safe-area-inset-left, 0px)); padding-right: max(var(--gut), env(safe-area-inset-right, 0px)); }
+.home-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: calc(14px + env(safe-area-inset-top, 0px)) 14px; border-bottom: 1px solid var(--line); }
+.home-logo { font-family: var(--logo); font-weight: 500; font-size: 32px; line-height: 1.1; letter-spacing: -.015em; }
+.home-help { font-size: 14px; color: var(--muted); text-align: right; }
+.home-help b { color: var(--fg); font-weight: 500; white-space: nowrap; font-variant-numeric: lining-nums tabular-nums; }
+.home-main { flex: 1 0 auto; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); align-items: center; gap: clamp(32px, 6vw, 96px); padding-block: clamp(40px, 7vw, 96px); }
+.home-text { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; }
+.home-text .eyebrow { color: var(--accent); }
+.home-text h1 { margin: 18px 0 0; font-family: var(--display); font-size: clamp(44px, 6vw, 84px); line-height: .98; text-wrap: balance; }
+.home-text h1 em { color: var(--accent); }
+.home-lead { margin: 26px 0 0; max-width: 44ch; font-size: 18px; line-height: 1.55; color: var(--muted); }
+.home-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 36px; }
+.home-actions .btn { min-height: 56px; padding: 0 30px; font-size: 15.5px; }
+.home-actions .btn svg { width: 18px; height: 18px; }
+.home-note { margin: 16px 0 0; font-size: 14px; color: var(--muted); max-width: 46ch; }
+.home-photo { position: relative; justify-self: end; width: auto; max-width: 100%; height: clamp(440px, calc(100svh - 190px), 760px); aspect-ratio: 736 / 981; background: url("/colline.jpg") 50% 70% / cover no-repeat, #0E3A78; }
+.home-photo::after { content: ""; position: absolute; inset: 0; box-shadow: inset 0 0 0 1px rgba(20, 19, 15, .06); }
+.home-points { list-style: none; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+.home-points li { padding: 28px 28px 32px 0; display: flex; flex-direction: column; gap: 8px; }
+.home-points li + li { padding-left: 28px; border-left: 1px solid var(--line); }
+.home-points .n { font-family: var(--display); font-size: 15px; color: var(--accent); font-variant-numeric: lining-nums; }
+.home-points b { font-family: var(--display); font-weight: 400; font-size: 23px; line-height: 1.15; }
+.home-points span { font-size: 14.5px; color: var(--muted); max-width: 36ch; }
+.home-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; padding-block: 18px calc(18px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+.home-foot em { font-family: var(--display); font-size: 15px; color: var(--fg); }
+@media (max-width: 860px) {
+  .home-main { grid-template-columns: minmax(0, 1fr); padding-block: 0 40px; gap: 28px; }
+  .home-photo { order: -1; justify-self: stretch; aspect-ratio: auto; max-width: none; height: 38vh; background-position: 50% 74%; margin-inline: calc(-1 * max(var(--gut), env(safe-area-inset-left, 0px))) calc(-1 * max(var(--gut), env(safe-area-inset-right, 0px))); }
+  .home-points { grid-template-columns: minmax(0, 1fr); }
+  .home-points li, .home-points li + li { padding: 20px 0; border-left: 0; }
+  .home-points li + li { border-top: 1px solid var(--line); }
+}
+@media (max-width: 480px) {
+  .home-logo { font-size: 26px; }
+  .home-help span { display: none; }
+  .home-actions { width: 100%; }
+  .home-actions .btn { flex: 1 1 100%; justify-content: center; }
+}
+`;
+const ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+const HOME = `<section id="home" hidden aria-labelledby="home-title">
+  <header class="home-top">
+    <span class="home-logo">ORALYSSE</span>
+    <p class="home-help"><span>Une question ? </span><b>01 45 22 72 19</b></p>
+  </header>
+  <div class="home-main">
+    <div class="home-text">
+      <p class="eyebrow">Votre coffre</p>
+      <h1 id="home-title">Ce que vos proches auront besoin de <em>savoir.</em></h1>
+      <p class="home-lead">Vos papiers, vos comptes, vos volontés et vos mots, rassemblés à votre rythme. Vous décidez qui recevra quoi, et quand.</p>
+      <div class="home-actions">
+        <button type="button" class="btn" data-home="create"><span id="home-create">Commencer</span>${ARROW}</button>
+        <button type="button" class="btn line" data-home="login">Ouvrir mon coffre</button>
+      </div>
+      <p class="home-note" id="home-note">Pas de mot de passe : à chaque connexion, un code vous est envoyé par e-mail.</p>
+    </div>
+    <div class="home-photo" role="img" aria-label="Une femme en robe rouge marche dans une prairie, sous un grand nuage blanc"></div>
+  </div>
+  <ol class="home-points">
+    <li><span class="n">01</span><b>Quelques minutes pour commencer</b><span>Quatre questions, puis votre coffre se remplit au fil de vos visites.</span></li>
+    <li><span class="n">02</span><b>Enregistré au fur et à mesure</b><span>Chaque modification est gardée. Vous reprenez là où vous en étiez.</span></li>
+    <li><span class="n">03</span><b>Vous choisissez qui reçoit quoi</b><span>Une personne de confiance par sujet, et un message pour chacun.</span></li>
+  </ol>
+  <footer class="home-foot"><em>Ce que vos proches auront besoin de savoir.</em><span>Oralysse · Mon coffre</span></footer>
+</section>
 `;
 const LOCK_SVG = '<svg class="biglock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path class="shackle" d="M8 11V8a4 4 0 0 1 8 0v3"/><path d="M12 15v2"/></svg>';
 const GATE = `<div class="vault-overlay" id="gate" hidden role="dialog" aria-modal="true" aria-labelledby="gate-title">
@@ -56,7 +124,7 @@ ${RESET}
 </head>
 <body>
 ${markup.trim()}
-${GATE}
+${HOME}${GATE}
 <script type="module" src="/src/main.js"></script>
 </body>
 </html>

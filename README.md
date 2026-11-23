@@ -17,17 +17,7 @@ L'app Oralysse prête pour Bolt : la démo cliquable, avec de vrais comptes et u
 
 1. Dans Bolt, cliquez sur **Supabase → Connect** et créez un projet. Choisissez la région **Paris (eu-west-3)** : la page affiche « Hébergé en France ».
 2. Bolt applique la migration `supabase/migrations/…_dossiers.sql` et remplit `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY`. Si la migration ne passe pas toute seule, copiez le fichier dans le **SQL Editor** de Supabase et exécutez-le.
-3. Dans le tableau de bord Supabase, **Authentication → Emails → Magic Link** : ajoutez le code au message, sinon le mail ne contient qu'un lien. Par exemple :
-
-   ```html
-   <h2>Votre code Oralysse</h2>
-   <p>Pour ouvrir votre coffre, saisissez ce code :</p>
-   <p style="font-size:28px;letter-spacing:6px"><b>{{ .Token }}</b></p>
-   <p>Ou cliquez sur ce lien : <a href="{{ .ConfirmationURL }}">ouvrir mon coffre</a></p>
-   <p>Si vous n'êtes pas à l'origine de cette demande, ignorez ce message.</p>
-   ```
-
-   Faites la même chose dans le modèle **Confirm signup**, qui sert au tout premier mail.
+3. Dans le tableau de bord Supabase, **Authentication → Emails** : collez les modèles du dossier `supabase/email-templates/` (onglet *Source*). `confirm-signup.html` va dans **Confirm sign up** (le tout premier mail), `magic-link.html` dans **Magic link** (chaque connexion). Ils contiennent le code `{{ .Token }}` : sans lui, le mail ne contient qu'un lien. Les objets conseillés sont dans `supabase/email-templates/README.md`.
 4. **Authentication → URL Configuration** : mettez l'adresse publiée de l'app dans *Site URL*, puis ajoutez l'adresse de prévisualisation Bolt dans *Redirect URLs*. Sans cela, le lien du mail renvoie vers la mauvaise adresse ; le code, lui, marche partout.
 5. **Avant de vrais utilisateurs**, configurez un serveur d'envoi (**Authentication → SMTP**, par exemple Brevo ou Resend). Les envois intégrés de Supabase sont limités à quelques mails par heure.
 

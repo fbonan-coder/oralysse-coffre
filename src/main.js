@@ -151,6 +151,30 @@ const gate = {
   },
   hide() { $('#gate').hidden = true; }
 };
+
+/* La page d'accueil : « Commencer » (ou reprendre un brouillon) et « Ouvrir mon coffre ». */
+const home = {
+  show() {
+    gate.hide();
+    const draft = LS.get(cloud ? DRAFT_KEY : DEMO_KEY);
+    $('#home-create').textContent = draft ? 'Reprendre mon dossier' : 'Commencer';
+    if (!cloud) $('#home-note').textContent = 'Version de démonstration : ce que vous saisissez reste dans ce navigateur.';
+    $('#home').hidden = false;
+    document.title = 'Oralysse · Mon coffre';
+  },
+  hide() { $('#home').hidden = true; }
+};
+function wireHome() {
+  $('#home').addEventListener('click', e => {
+    const b = e.target.closest('[data-home]'); if (!b) return;
+    if (b.dataset.home === 'create') {
+      home.hide();
+      env.initial = LS.get(cloud ? DRAFT_KEY : DEMO_KEY);
+      launch(); window.scrollTo(0, 0);
+    } else if (cloud) gate.show('login');
+    else { home.hide(); env.initial = LS.get(DEMO_KEY); launch(); }
+  });
+}
 const say = e => ({
   no_account: 'Aucun dossier n’est ouvert avec cette adresse. Vérifiez-la, ou créez votre dossier.',
   rate: 'Trop de codes demandés d’un coup. Attendez une minute, puis réessayez.',
@@ -169,8 +193,9 @@ function wireGate() {
   $('#gate').addEventListener('click', e => {
     const b = e.target.closest('[data-gate]'); if (!b) return;
     const a = b.dataset.gate;
-    if (a === 'create') { gate.hide(); env.initial = LS.get(DRAFT_KEY); launch(); }
-    else if (a === 'login' || a === 'choose') gate.show(a);
+    if (a === 'create') { gate.hide(); home.hide(); env.initial = LS.get(DRAFT_KEY); launch(); }
+    else if (a === 'choose') home.show();
+    else if (a === 'login') gate.show(a);
     else if (a === 'resend') sendLogin($('#gate').dataset.email).then(() => { $('#gate-note').textContent = 'Un nouveau code vient de partir.'; });
     else if (a === 'retry') location.reload();
   });
@@ -205,14 +230,14 @@ async function openDossier(u) {
   if (!initial && draft) { initial = draft; push = true; }
   LS.del(DRAFT_KEY);
   env.initial = initial;
-  gate.hide();
+  gate.hide(); home.hide();
   launch();
   if (push || !row) persist(app.state());
 }
 
 async function boot() {
-  wireGate();
-  if (!cloud) { env.initial = LS.get(DEMO_KEY); launch(); return; }
+  wireGate(); wireHome();
+  if (!cloud) { home.show(); return; }
   env.auth = auth;
   gate.show('wait', { text: 'Un instant.' });
   let u = null;
@@ -220,7 +245,7 @@ async function boot() {
   /* Le lien du mail revient avec ?code=… : on le retire de l'adresse une fois la session ouverte. */
   if (/[?&]code=/.test(location.search)) history.replaceState(null, '', location.pathname + location.hash);
   if (u) { openDossier(u); return; }
-  gate.show('choose');
+  home.show();
   /* Lien du mail ouvert dans un autre onglet : la session arrive ici aussi. */
   cloud.onSignedIn(nu => { if (!$('#gate').hidden && $('#gate').dataset.mode === 'code') openDossier(nu); });
 }
